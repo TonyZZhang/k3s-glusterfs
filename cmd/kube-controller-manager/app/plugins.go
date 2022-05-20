@@ -34,6 +34,7 @@ import (
 	"k8s.io/kubernetes/pkg/volume/csi"
 	"k8s.io/kubernetes/pkg/volume/flexvolume"
 	"k8s.io/kubernetes/pkg/volume/hostpath"
+	"k8s.io/kubernetes/pkg/volume/glusterfs"
 	"k8s.io/kubernetes/pkg/volume/iscsi"
 	"k8s.io/kubernetes/pkg/volume/local"
 	"k8s.io/kubernetes/pkg/volume/nfs"
@@ -84,7 +85,6 @@ func ProbeExpandableVolumePlugins(config persistentvolumeconfig.VolumeConfigurat
 // provisioner/recycler/deleter interface should be returned.
 func ProbeControllerVolumePlugins(cloud cloudprovider.Interface, config persistentvolumeconfig.VolumeConfiguration) ([]volume.VolumePlugin, error) {
 	allPlugins := []volume.VolumePlugin{}
-
 	// The list of plugins to probe is decided by this binary, not
 	// by dynamic linking or other "magic".  Plugins will be analyzed and
 	// initialized later.
@@ -119,7 +119,7 @@ func ProbeControllerVolumePlugins(cloud cloudprovider.Interface, config persiste
 	if err != nil {
 		return allPlugins, err
 	}
-
+	allPlugins = append(allPlugins, glusterfs.ProbeVolumePlugins()...)
 	allPlugins = append(allPlugins, local.ProbeVolumePlugins()...)
 
 	if utilfeature.DefaultFeatureGate.Enabled(features.CSIInlineVolume) {
